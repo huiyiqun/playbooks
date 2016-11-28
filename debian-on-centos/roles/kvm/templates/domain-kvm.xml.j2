@@ -1,11 +1,10 @@
 <domain type='kvm'>
-  <name>shared-guest</name>
+  <name>{{vm_name}}</name>
   <memory unit='MB'>4096</memory>
-  <vcpu>2</vcpu>
+  <vcpu>4</vcpu>
   <os>
     <type>hvm</type>
     {% if installed is undefined %}
-    <boot dev='cdrom'/>
     <kernel>/data/iso/vmlinuz</kernel>
     <initrd>/data/iso/initrd.gz</initrd>
     <cmdline>console=ttyS0 auto=true priority=critical url="http://192.168.101.1:2015/preseed-shared-guest.txt" interface=auto netcfg/dhcp_timeout=60</cmdline>
@@ -15,27 +14,28 @@
   </os>
   <devices>
     <disk type='volume' device='disk'>
-      <source pool='vms' volume='shared-guest.qcow2'/>
+      <source pool='vms' volume='{{vm_name}}.qcow2'/>
       <target dev='hda'/>
     </disk>
     {% if installed is undefined %}
     <disk type='volume' device='cdrom'>
       <driver name='qemu' type='raw'/>
       <source pool='iso' volume='debian-8.6.0-amd64-netinst.iso'/>
-      <target dev='hdc' bus='ide'/>
+      <target dev='hdb' bus='ide'/>
       <readonly/>
     </disk>
-    {% endif %}
     <interface type='network'>
       <source network='nat'/>
       <mac address='02:33:33:33:33:33'/>
     </interface>
-    {% if installed is undefined %}
     <serial type='file'>
       <source path="/tmp/shared-guest-serial0.log"/>
       <target port='0'/>
     </serial>
     {% else %}
+    <interface type='direct' trustGuestRxFilters='yes'>
+      <source network='{{phy_interface}}' mode='bridge'/>
+    </interface>
     <serial type='pty'>
       <target port='0'/>
     </serial>
@@ -44,5 +44,4 @@
       <target type='serial' port='0'/>
     </console>
   </devices>
-
 </domain>
