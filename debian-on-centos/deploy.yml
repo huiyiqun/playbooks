@@ -3,7 +3,7 @@
   become: yes
   vars_prompt:
     - name: "confirm"
-      prompt: "This playbook will ERASE pre-installed shared-guest, are you sure?(type YES)"
+      prompt: "This playbook will ERASE pre-installed vm, are you sure?(type YES)"
   pre_tasks:
     - assert:
         that:

@@ -7,7 +7,7 @@
     {% if installed is undefined %}
     <kernel>/mnt/vm/iso/vmlinuz</kernel>
     <initrd>/mnt/vm/iso/initrd.gz</initrd>
-    <cmdline>console=ttyS0 auto=true priority=critical url="http://192.168.101.1:2015/preseed-shared-guest.txt" interface=auto netcfg/dhcp_timeout=60</cmdline>
+    <cmdline>console=ttyS0 auto=true priority=critical url="http://192.168.101.1:2015/preseed-{{vm_name}}.txt" interface=auto netcfg/dhcp_timeout=60</cmdline>
     {% else %}
     <boot dev='hd'/>
     {% endif %}
@@ -29,7 +29,7 @@
       <mac address='02:33:33:33:33:33'/>
     </interface>
     <serial type='file'>
-      <source path="/tmp/shared-guest-serial0.log"/>
+      <source path="/tmp/{{vm_name}}-serial0.log"/>
       <target port='0'/>
     </serial>
     {% else %}

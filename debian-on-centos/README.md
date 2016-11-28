@@ -30,7 +30,7 @@ Run it
 
 ```
 $ git clone git@github.com:tuna/playbooks.git
-$ cd playbooks/shared-guest
+$ cd playbooks/debian-on-centos
 $ ansible-playbook -i path/to/inventory deploy.yml
 ```
 
@@ -39,7 +39,7 @@ $ ansible-playbook -i path/to/inventory deploy.yml
 然后安装就开始了，`TASK [kvm : wait for installation finished]`会卡比较久，如果对安装进度感兴趣可以上host，然后:
 
 ```
-$ sudo tail -f /tmp/shared-guest-serial0.log
+$ sudo tail -f /tmp/*-serial0.log
 ```
 
 能看到安装进度。
