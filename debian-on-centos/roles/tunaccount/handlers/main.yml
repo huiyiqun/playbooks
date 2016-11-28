@@ -1,6 +1,0 @@
----
-- name: restart nslcd and nscd
-  service: name={{item}} state=restarted
-  with_items:
-    - nslcd
-    - nscd
