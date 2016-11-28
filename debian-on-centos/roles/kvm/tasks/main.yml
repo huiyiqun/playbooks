@@ -1,7 +1,4 @@
 ---
-- name: enable ius
-  yum: pkg=https://centos7.iuscommunity.org/ius-release.rpm
-
 - name: install required packages
   yum: name={{item}}
   with_items:
