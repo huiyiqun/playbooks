@@ -61,14 +61,11 @@
     - iso
     - vms
 
-- name: define macvtap network
-  virt_net: name=macvtap command=define xml='{{ lookup("template", "net-macvtap.xml.j2") }}'
+- name: define nat network for installation
+  virt_net: name=nat command=define xml='{{ lookup("template", "net-nat.xml.j2") }}'
 
-- name: start macvtap network
-  virt_net: name=macvtap state=active
-
-- name: enable macvtap network
-  virt_net: name=macvtap autostart=yes
+- name: start nat network for installation
+  virt_net: name=nat state=active
 
 - name: create directory for preseeds
   file: path=/tmp/preseeds state=directory mode="u=rwx,g=,o="
