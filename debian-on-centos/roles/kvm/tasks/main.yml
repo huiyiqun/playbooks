@@ -1,18 +1,21 @@
 ---
+- name: enable ius
+  yum: pkg=https://centos7.iuscommunity.org/ius-release.rpm
+
 - name: install required packages
-  apt: name={{item}}
+  yum: name={{item}}
   with_items:
     - qemu-kvm
-    - libvirt-bin
-    - python-libvirt
+    - libvirt
+    - libvirt-python
     - python-lxml
-    - daemon
+    - daemonize
 
 - name: ensure that libvirtd has been started correctly
   service: name=libvirtd state=started enabled=yes
 
 - name: create directory for iso and vms
-  file: path=/data/{{item}} state=directory
+  file: path=/mnt/vm/{{item}} state=directory
   with_items:
     - iso
     - vms
@@ -20,7 +23,7 @@
 - name: download netinst iso for jessie
   get_url:
     url: https://mirrors.tuna.tsinghua.edu.cn/debian-cd/8.6.0/amd64/iso-cd/debian-8.6.0-amd64-netinst.iso
-    dest: /data/iso/
+    dest: /mnt/vm/iso/
     checksum: sha256:9479c5c2df72ae3878116c43fb42eefae53d1fe363ce514a6afc8289064b9f5f
   notify:
     - refresh pool for iso
@@ -28,7 +31,7 @@
 - name: download initrd and kernel for installer
   get_url:
     url: https://mirrors.tuna.tsinghua.edu.cn/debian/dists/jessie/main/installer-amd64/current/images/cdrom/{{item}}
-    dest: /data/iso/
+    dest: /mnt/vm/iso/
   with_items:
     - vmlinuz
     - initrd.gz
@@ -36,7 +39,7 @@
     - refresh pool for iso
 
 - name: create volume for guest
-  qemu_img: dest=/data/vms/shared-guest.qcow2 size=102400
+  qemu_img: dest=/mnt/vm/vms/{{vm_name}}.qcow2 size=102400
   notify:
     - refresh pool for vms
 
@@ -58,30 +61,30 @@
     - iso
     - vms
 
-- name: define nat network
-  virt_net: name=nat command=define xml='{{ lookup("template", "net-nat.xml.j2") }}'
+- name: define macvtap network
+  virt_net: name=macvtap command=define xml='{{ lookup("template", "net-macvtap.xml.j2") }}'
 
-- name: start nat network
-  virt_net: name=nat state=active
+- name: start macvtap network
+  virt_net: name=macvtap state=active
 
-- name: enable nat network
-  virt_net: name=nat autostart=yes
+- name: enable macvtap network
+  virt_net: name=macvtap autostart=yes
 
 - name: create directory for preseeds
   file: path=/tmp/preseeds state=directory mode="u=rwx,g=,o="
 
 - name: upload preseed
-  template: src=preseed.j2 dest=/tmp/preseeds/preseed-shared-guest.txt mode="u=rw,g=,o="
+  template: src=preseed.j2 dest=/tmp/preseeds/preseed-{{vm_name}}.txt mode="u=rw,g=,o="
 
 - name: destroy and undefine pre-installed guest, or following defining does not work
-  virt: name="shared-guest" command={{item}}
+  virt: name="{{vm_name}}" command={{item}}
   with_items:
     - undefine
     - destroy
   ignore_errors: yes
 
 - name: define the guest
-  virt: name="shared-guest" command=define xml='{{ lookup("template", "domain-kvm.xml.j2") }}'
+  virt: name="{{vm_name}}" command=define xml='{{ lookup("template", "domain-kvm.xml.j2") }}'
 
 - name: create directory for caddy
   file: path=/opt/caddy state=directory mode="u=rwx,g=,o="
@@ -97,25 +100,25 @@
   template: src=Caddyfile.j2 dest=/tmp/Caddyfile mode="u=rwx,g=,o="
 
 - name: start caddy
-  command: daemon -n caddy -- /opt/caddy/caddy -conf=/tmp/Caddyfile
+  command: daemon -p /tmp/caddy.pid -- /opt/caddy/caddy -conf=/tmp/Caddyfile
 
 - name: remove the old log
-  file: path=/tmp/shared-guest-serial0.log state=absent
+  file: path=/tmp/{{vm_name}}-serial0.log state=absent
 
 - name: start the installation
-  virt: name="shared-guest" state=running
+  virt: name="{{vm_name}}" state=running
 
 - name: wait for installation finished
-  wait_for: path=/tmp/shared-guest-serial0.log search_regex="System halted" timeout=1200
+  wait_for: path=/tmp/{{vm_name}}-serial0.log search_regex="System halted" timeout=1200
 
 - name: delete preseed
-  file: path=/tmp/preseeds/preseed-shared-guest.txt state=absent
+  file: path=/tmp/preseeds/preseed-{{vm_name}}.txt state=absent
 
 - name: stop caddy
-  command: daemon -n caddy --stop
+  command: pkill -F /tmp/caddy.pid
 
 - name: undefine and destroy the guest
-  virt: name="shared-guest" command={{item}}
+  virt: name="{{vm_name}}" command={{item}}
   with_items:
     - undefine
     - destroy
@@ -123,33 +126,7 @@
 - set_fact: installed=yes
 
 - name: redefine the guest
-  virt: name="shared-guest" command=define xml='{{ lookup("template", "domain-kvm.xml.j2") }}'
+  virt: name="{{vm_name}}" command=define xml='{{ lookup("template", "domain-kvm.xml.j2") }}'
 
 - name: start the guest
-  virt: name="shared-guest" state=running
-
-- name: wait for the guest up
-  wait_for: host=192.168.101.100 port=22 search_regex=OpenSSH
-
-- name: set up DNAT for ssh
-  iptables:
-    table: nat
-    chain: PREROUTING
-    in_interface: eth0
-    protocol: tcp
-    match: tcp
-    destination_port: "{{ hostvars['kvm-guest']['ansible_port'] }}"
-    jump: DNAT
-    to_destination: 192.168.101.100:22
-    comment: DNAT rule for ssh service of everest
-
-- name: enable forwarding for ssh
-  iptables:
-    action: insert
-    chain: FORWARD
-    in_interface: eth0
-    destination: 192.168.101.100
-    destination_port: 22
-    protocol: tcp
-    jump: ACCEPT
-    comment: allow ssh connection for everest to be forwarded
+  virt: name="{{vm_name}}" state=running
