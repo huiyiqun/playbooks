@@ -107,7 +107,7 @@
   virt: name="{{vm_name}}" state=running
 
 - name: wait for installation finished
-  wait_for: path=/tmp/{{vm_name}}-serial0.log search_regex="System halted" timeout=1200
+  wait_for: path=/tmp/{{vm_name}}-serial0.log search_regex="System halted" timeout=3600
 
 - name: delete preseed
   file: path=/tmp/preseeds/preseed-{{vm_name}}.txt state=absent
