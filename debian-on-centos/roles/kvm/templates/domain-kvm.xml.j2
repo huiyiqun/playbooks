@@ -5,8 +5,8 @@
   <os>
     <type>hvm</type>
     {% if installed is undefined %}
-    <kernel>/data/iso/vmlinuz</kernel>
-    <initrd>/data/iso/initrd.gz</initrd>
+    <kernel>/mnt/vm/iso/vmlinuz</kernel>
+    <initrd>/mnt/vm/iso/initrd.gz</initrd>
     <cmdline>console=ttyS0 auto=true priority=critical url="http://192.168.101.1:2015/preseed-shared-guest.txt" interface=auto netcfg/dhcp_timeout=60</cmdline>
     {% else %}
     <boot dev='hd'/>
