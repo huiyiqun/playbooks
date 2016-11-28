@@ -1,24 +1,13 @@
-Shared Guest
-============
+Debian on CentOS
+================
 
-萌新们可能需要一个机器来学(xia)技(zhe)术(teng)，所以就有了这样一个
-计划，在alfa上用kvm装一个虚拟机，也方便共享文件什么的。
-
-写ansible有两个目的，第一是为了方便将来迁移，第二是为了防止萌新把虚拟机玩坏了需要重装
-~~，第三是为了学(xia)技(zhe)术(teng)~~。
+实验室只有一台机器，所以节约着用。
 
 Pre-Prepare
 -----------
 
-* ansible > 2.2 (currently rc)
-* access to alfa and sudo permission on alfa
-
-当前ansible 2.2还在rc，所以用发行版或者用pypi都装不了（摔！），所以直接从github装：
-
-```
-$ virtualenv2 venv
-$ ./venv/bin/pip install git+https://github.com/ansible/ansible.git@v2.2.0.0-0.1.rc1
-```
+* ansible > 2.2
+* access to kvm-host
 
 Prepare
 -------
@@ -39,17 +28,15 @@ kvm-guest ansible_host=alfa.s.tuna.tsinghua.edu.cn ansible_user=<Your Username> 
 Run it
 ------
 
-假定ansible是装在virtualenv里的。
-
 ```
 $ git clone git@github.com:tuna/playbooks.git
 $ cd playbooks/shared-guest
-$ path/to/venv/bin/ansible-playbook -i path/to/inventory deploy.yml
+$ ansible-playbook -i path/to/inventory deploy.yml
 ```
 
 之后让你输入个YES，以免不小心把虚拟机重装了。
 
-然后安装就开始了，`TASK [kvm : wait for installation finished]`会卡比较久，如果对安装进度感兴趣可以上alfa，然后:
+然后安装就开始了，`TASK [kvm : wait for installation finished]`会卡比较久，如果对安装进度感兴趣可以上host，然后:
 
 ```
 $ sudo tail -f /tmp/shared-guest-serial0.log
