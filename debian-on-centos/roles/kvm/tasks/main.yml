@@ -12,6 +12,13 @@
 - name: disable selinux
   selinux: state=disabled
 
+- name: destroy and undefine pre-installed guest, or following defining does not work
+  virt: name="{{vm_name}}" command={{item}}
+  with_items:
+    - destroy
+    - undefine
+  ignore_errors: yes
+
 - name: ensure that libvirtd has been started correctly
   service: name=libvirtd state=started enabled=yes
 
@@ -74,13 +81,6 @@
 - name: upload preseed
   template: src=preseed.j2 dest=/tmp/preseeds/preseed-{{vm_name}}.txt mode="u=rw,g=,o="
 
-- name: destroy and undefine pre-installed guest, or following defining does not work
-  virt: name="{{vm_name}}" command={{item}}
-  with_items:
-    - undefine
-    - destroy
-  ignore_errors: yes
-
 - name: define the guest
   virt: name="{{vm_name}}" command=define xml='{{ lookup("template", "domain-kvm.xml.j2") }}'
 
@@ -118,8 +118,8 @@
 - name: undefine and destroy the guest
   virt: name="{{vm_name}}" command={{item}}
   with_items:
-    - undefine
     - destroy
+    - undefine
 
 - set_fact: installed=yes
 
