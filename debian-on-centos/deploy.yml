@@ -14,8 +14,3 @@
 
   roles:
     - kvm
-
-- hosts: kvm-guest
-  become: yes
-  roles:
-    - tunaccount
