@@ -5,8 +5,12 @@
     - qemu-kvm
     - libvirt
     - libvirt-python
+    - libselinux-python
     - python-lxml
     - daemonize
+
+- name: disable selinux
+  selinux: state=disabled
 
 - name: ensure that libvirtd has been started correctly
   service: name=libvirtd state=started enabled=yes
