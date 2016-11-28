@@ -97,8 +97,12 @@
 - name: upload Caddyfile
   template: src=Caddyfile.j2 dest=/tmp/Caddyfile mode="u=rwx,g=,o="
 
+- stat: path=/tmp/caddy.pid
+  registr: pid_file
+
 - name: start caddy
   command: daemonize -p /tmp/caddy.pid -- /opt/caddy/caddy -conf=/tmp/Caddyfile
+  when: not pid_file.stat.exists
 
 - name: remove the old log
   file: path=/tmp/{{vm_name}}-serial0.log state=absent
@@ -114,6 +118,9 @@
 
 - name: stop caddy
   command: pkill -F /tmp/caddy.pid
+
+- name: remove pid file
+  file: path=/tmp/caddy.pid state=absent
 
 - name: undefine and destroy the guest
   virt: name="{{vm_name}}" command={{item}}
