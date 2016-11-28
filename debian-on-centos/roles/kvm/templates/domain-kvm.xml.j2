@@ -34,7 +34,7 @@
     </serial>
     {% else %}
     <interface type='direct' trustGuestRxFilters='yes'>
-      <source network='{{phy_interface}}' mode='bridge'/>
+      <source dev='{{phy_interface}}' mode='bridge'/>
     </interface>
     <serial type='pty'>
       <target port='0'/>
