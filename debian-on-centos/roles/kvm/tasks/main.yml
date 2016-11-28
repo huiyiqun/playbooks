@@ -98,7 +98,7 @@
   template: src=Caddyfile.j2 dest=/tmp/Caddyfile mode="u=rwx,g=,o="
 
 - stat: path=/tmp/caddy.pid
-  registr: pid_file
+  register: pid_file
 
 - name: start caddy
   command: daemonize -p /tmp/caddy.pid -- /opt/caddy/caddy -conf=/tmp/Caddyfile
