@@ -98,7 +98,7 @@
   template: src=Caddyfile.j2 dest=/tmp/Caddyfile mode="u=rwx,g=,o="
 
 - name: start caddy
-  command: daemon -p /tmp/caddy.pid -- /opt/caddy/caddy -conf=/tmp/Caddyfile
+  command: daemonize -p /tmp/caddy.pid -- /opt/caddy/caddy -conf=/tmp/Caddyfile
 
 - name: remove the old log
   file: path=/tmp/{{vm_name}}-serial0.log state=absent
