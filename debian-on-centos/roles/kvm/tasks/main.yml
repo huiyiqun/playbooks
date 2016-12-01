@@ -135,3 +135,6 @@
 
 - name: start the guest
   virt: name="{{vm_name}}" state=running
+
+- name: autostart the guest
+  virt: name="{{vm_name}}" command=autostart
