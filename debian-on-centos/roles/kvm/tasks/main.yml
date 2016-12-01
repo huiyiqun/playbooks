@@ -69,6 +69,8 @@
     - iso
     - vms
 
+- meta: flush_handlers
+
 - name: define nat network for installation
   virt_net: name=nat command=define xml='{{ lookup("template", "net-nat.xml.j2") }}'
 
