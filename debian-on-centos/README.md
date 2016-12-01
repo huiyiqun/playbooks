@@ -19,12 +19,13 @@ Prepare
 你需要写一个inventory文件，这样ansible才能去服务器上执行操作。下面是一个模板：
 
 ```
-kvm-host ansible_host=<Your host IP> ansible_user=<Your Username> ansible_become_pass=<Your Password>
+kvm-host ansible_host=<Your host IP> ansible_user=<Your Username> ansible_become_pass=<Your Password> vm_name=<Name of Guest in libvirt> phy_interface=<Physical Interface>
 kvm-guest ansible_user=<Your Username> ansible_ssh_pass=<Your Password> ansible_become_pass={{ansible_ssh_pass}} ansible_ssh_extra_args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
 ```
 
 * kvm-host 没什么好说的，写得不对上不去服务器。
-* kvm-guest 这一行里的Username和Password可以随便写，安装虚拟机的过程中会用这对用户名密码来建用户
+* kvm-guest 这一行里的`ansible_user`、`ansible_ssh_pass`和`vm_name`可以随便写，安装虚拟机的过程中会用到这些信息来作配置。
+* kvm-guest 这一行里的`phy_interface`是安装完成之后用于复用的物理网口，可以在 kvm-host 上`ip link`找到，写不对安装完网络不通。
 * 安装完之后最好还是把密码改了吧。
 * kvm-guest 这一行里的`ansible_ssh_extra_args`是因为这台机器是新装的，fingerprint肯定是未知的，而且重装之后还会变，干脆就ignore掉好了，算是个比较脏的hack。
 * 如果安装完之后还想继续用这个inventory文件，可以把`ansible_host=<Your guest IP>加到 kvm-guest 这一行后面即可，安装过程中不需要这个。
