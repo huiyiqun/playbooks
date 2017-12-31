@@ -136,7 +136,4 @@
   virt: name="{{vm_name}}" command=define xml='{{ lookup("template", "domain-kvm.xml.j2") }}'
 
 - name: start the guest
-  virt: name="{{vm_name}}" state=running
-
-- name: autostart the guest
-  virt: name="{{vm_name}}" command=autostart
+  virt: name="{{vm_name}}" state=running autostart=yes
