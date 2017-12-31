@@ -47,7 +47,7 @@
     - refresh pool for iso
 
 - name: create volume for guest
-  qemu_img: dest=/mnt/vm/vms/{{vm_name}}.qcow2 size=102400
+  qemu_img: dest=/mnt/vm/vms/{{vm_name}}.qcow2 size=102400 opt=preallocation=metadata
   notify:
     - refresh pool for vms
 
